@@ -8,7 +8,8 @@ const Header = () => {
   const navItems = [
     { path: '/', label: 'Inicio', icon: Database },
     { path: '/upload', label: 'Carga de Datos', icon: Database },
-    { path: '/config', label: 'Configuración', icon: Settings },
+    { path: '/cleaning', label: 'Limpieza', icon: Settings },
+    { path: '/config', label: 'Modelo', icon: Settings },
     { path: '/dashboard', label: 'Dashboard', icon: BarChart3 },
   ];
 

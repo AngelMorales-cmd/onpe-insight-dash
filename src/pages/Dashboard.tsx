@@ -7,7 +7,8 @@ import BarChartComponent from '@/components/Charts/BarChartComponent';
 import LineChartComponent from '@/components/Charts/LineChartComponent';
 import PieChartComponent from '@/components/Charts/PieChartComponent';
 import RadialChartComponent from '@/components/Charts/RadialChartComponent';
-import { TrendingUp, Users, Target, CheckCircle } from 'lucide-react';
+import TopCandidates from '@/components/Dashboard/TopCandidates';
+import { TrendingUp, Users, FileText, Target } from 'lucide-react';
 
 const Dashboard = () => {
   const { csvData, modelConfig } = useDataContext();
@@ -49,41 +50,14 @@ const Dashboard = () => {
     { name: 'F1-Score', accuracy: 90, fill: 'hsl(215 85% 55%)' },
   ];
 
-  const metrics = [
-    {
-      title: 'Total de Votos',
-      value: '223,000',
-      icon: Users,
-      color: 'text-primary',
-    },
-    {
-      title: 'Tasa de Participación',
-      value: '85%',
-      icon: TrendingUp,
-      color: 'text-secondary',
-    },
-    {
-      title: 'Precisión del Modelo',
-      value: '92%',
-      icon: Target,
-      color: 'text-primary',
-    },
-    {
-      title: 'Análisis Completado',
-      value: 'Exitoso',
-      icon: CheckCircle,
-      color: 'text-secondary',
-    },
-  ];
-
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="mb-2 text-3xl font-bold text-foreground">Dashboard de Análisis</h1>
+            <h1 className="mb-2 text-3xl font-bold text-foreground">Dashboard Analítico Electoral</h1>
             <p className="text-muted-foreground">
-              Resultados del análisis electoral con visualizaciones interactivas
+              Resultados del análisis procesado con Pandas, NumPy, Scikit-Learn y PyTorch
             </p>
           </div>
           <Badge variant="outline" className="text-sm">
@@ -93,23 +67,62 @@ const Dashboard = () => {
       </div>
 
       {/* Metrics Cards */}
-      <div className="mb-8 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {metrics.map((metric, index) => {
-          const Icon = metric.icon;
-          return (
-            <Card key={index} className="shadow-medium">
-              <CardContent className="pt-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-muted-foreground">{metric.title}</p>
-                    <p className="mt-2 text-2xl font-bold text-foreground">{metric.value}</p>
-                  </div>
-                  <Icon className={`h-10 w-10 ${metric.color}`} />
-                </div>
-              </CardContent>
-            </Card>
-          );
-        })}
+      <div className="mb-6 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <Card className="shadow-medium">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total de Votantes</CardTitle>
+            <Users className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-foreground">13,770,000</div>
+            <p className="text-xs text-muted-foreground">+12.5% respecto a elección anterior</p>
+          </CardContent>
+        </Card>
+
+        <Card className="shadow-medium">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Tasa de Participación</CardTitle>
+            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-foreground">78.3%</div>
+            <p className="text-xs text-muted-foreground">Alta participación ciudadana</p>
+          </CardContent>
+        </Card>
+
+        <Card className="shadow-medium">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Mesas Escrutadas</CardTitle>
+            <FileText className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-foreground">95.7%</div>
+            <p className="text-xs text-muted-foreground">23,452 de 24,501 mesas</p>
+          </CardContent>
+        </Card>
+
+        <Card className="shadow-medium">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Precisión del Modelo</CardTitle>
+            <Target className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-foreground">94.2%</div>
+            <p className="text-xs text-muted-foreground">
+              {modelConfig.modelType === 'neural-network' && 'Red Neuronal (PyTorch)'}
+              {modelConfig.modelType === 'logistic-regression' && 'Regresión Logística'}
+              {modelConfig.modelType === 'random-forest' && 'Random Forest'}
+              {modelConfig.modelType === 'gradient-boosting' && 'Gradient Boosting'}
+              {modelConfig.modelType === 'svm' && 'SVM (Scikit-Learn)'}
+              {!modelConfig.modelType && 'Modelo predictivo'}
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Top Candidates Section */}
+      <div className="mb-6">
+        <TopCandidates />
       </div>
 
       {/* Charts Grid */}

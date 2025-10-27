@@ -9,6 +9,7 @@ import Header from "./components/Layout/Header";
 import AppTour from "./components/Tour/AppTour";
 import Home from "./pages/Home";
 import DataUpload from "./pages/DataUpload";
+import DataCleaning from "./pages/DataCleaning";
 import ModelConfig from "./pages/ModelConfig";
 import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
@@ -43,6 +44,7 @@ const App = () => {
                 <Routes>
                   <Route path="/" element={<Home />} />
                   <Route path="/upload" element={<DataUpload />} />
+                  <Route path="/cleaning" element={<DataCleaning />} />
                   <Route path="/config" element={<ModelConfig />} />
                   <Route path="/dashboard" element={<Dashboard />} />
                   <Route path="*" element={<NotFound />} />
