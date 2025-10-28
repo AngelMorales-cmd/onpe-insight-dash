@@ -10,27 +10,18 @@ const AppTour = ({ run, onComplete }: AppTourProps) => {
   const [steps] = useState<Step[]>([
     {
       target: 'body',
-      content: 'Bienvenido a la Plataforma de Análisis Electoral ONPE. Esta guía te mostrará cómo usar el sistema con Python, Pandas, NumPy, Scikit-Learn y PyTorch.',
+      content: 'Bienvenido al Sistema Electoral ONPE. Este sistema permite tanto la votación pública como la administración electoral con herramientas de análisis avanzado.',
       placement: 'center',
     },
     {
-      target: '[href="/upload"]',
-      content: 'Paso 1: Carga tu archivo CSV con datos electorales usando este módulo.',
+      target: '[href="/"]',
+      content: 'En la página principal, los ciudadanos pueden votar por sus candidatos preferidos de manera segura.',
       disableBeacon: true,
     },
     {
-      target: '[href="/cleaning"]',
-      content: 'Paso 2: Configura las opciones de limpieza de datos con Pandas y NumPy (manejo de nulos, normalización, encoding).',
-      disableBeacon: true,
-    },
-    {
-      target: '[href="/config"]',
-      content: 'Paso 3: Selecciona el modelo de Machine Learning que deseas entrenar (Scikit-Learn o PyTorch).',
-      disableBeacon: true,
-    },
-    {
-      target: '[href="/dashboard"]',
-      content: 'Paso 4: Visualiza los resultados, candidatos más votados y gráficos interactivos generados por los modelos.',
+      target: 'body',
+      content: 'Los administradores pueden acceder a herramientas avanzadas de análisis electoral usando Pandas, NumPy, Scikit-Learn y PyTorch para procesar y modelar datos electorales.',
+      placement: 'center',
       disableBeacon: true,
     },
   ]);
