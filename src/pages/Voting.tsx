@@ -6,6 +6,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { CheckCircle2, Vote } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 interface Candidate {
   id: string;
@@ -20,6 +23,14 @@ const Voting = () => {
   const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [votedFor, setVotedFor] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showVoteDialog, setShowVoteDialog] = useState(false);
+  const [selectedCandidateId, setSelectedCandidateId] = useState<string | null>(null);
+  const [formData, setFormData] = useState({
+    fullName: '',
+    email: '',
+    phone: '',
+    address: ''
+  });
   const { user } = useAuth();
   const { toast } = useToast();
 
@@ -28,6 +39,26 @@ const Voting = () => {
     if (user) {
       checkExistingVote();
     }
+
+    // Setup realtime subscription for votes
+    const channel = supabase
+      .channel('votes-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'votes'
+        },
+        () => {
+          fetchCandidates();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [user]);
 
   const fetchCandidates = async () => {
@@ -56,7 +87,7 @@ const Voting = () => {
     }
   };
 
-  const handleVote = async (candidateId: string) => {
+  const handleVote = (candidateId: string) => {
     if (!user) {
       toast({
         title: "Inicia sesión",
@@ -75,11 +106,31 @@ const Voting = () => {
       return;
     }
 
+    setSelectedCandidateId(candidateId);
+    setShowVoteDialog(true);
+  };
+
+  const submitVote = async () => {
+    if (!selectedCandidateId || !user) return;
+
+    if (!formData.fullName || !formData.email || !formData.phone || !formData.address) {
+      toast({
+        title: "Campos incompletos",
+        description: "Por favor, complete todos los campos",
+        variant: "destructive",
+      });
+      return;
+    }
+
     const { error } = await supabase
       .from('votes')
       .insert({
         user_id: user.id,
-        candidate_id: candidateId,
+        candidate_id: selectedCandidateId,
+        full_name: formData.fullName,
+        email: formData.email,
+        phone: formData.phone,
+        address: formData.address,
       });
 
     if (error) {
@@ -89,7 +140,9 @@ const Voting = () => {
         variant: "destructive",
       });
     } else {
-      setVotedFor(candidateId);
+      setVotedFor(selectedCandidateId);
+      setShowVoteDialog(false);
+      setFormData({ fullName: '', email: '', phone: '', address: '' });
       toast({
         title: "¡Voto registrado!",
         description: "Tu voto ha sido registrado exitosamente",
@@ -175,6 +228,60 @@ const Voting = () => {
           </Card>
         ))}
       </div>
+
+      <Dialog open={showVoteDialog} onOpenChange={setShowVoteDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Ingrese sus datos personales</DialogTitle>
+            <DialogDescription>
+              Por favor, complete sus datos para registrar su voto.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="fullName">Nombre Completo</Label>
+              <Input
+                id="fullName"
+                value={formData.fullName}
+                onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+                placeholder="Ingrese su nombre completo"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="email">Correo Electrónico</Label>
+              <Input
+                id="email"
+                type="email"
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                placeholder="correo@ejemplo.com"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="phone">Teléfono</Label>
+              <Input
+                id="phone"
+                type="tel"
+                value={formData.phone}
+                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                placeholder="Ingrese su teléfono"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="address">Dirección</Label>
+              <Input
+                id="address"
+                value={formData.address}
+                onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                placeholder="Ingrese su dirección"
+              />
+            </div>
+            <Button onClick={submitVote} className="w-full">
+              Confirmar Voto
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

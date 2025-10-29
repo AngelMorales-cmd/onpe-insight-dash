@@ -10,6 +10,7 @@ interface CleaningOptions {
   handleNulls: boolean;
   normalizeData: boolean;
   encodeCategories: boolean;
+  removeDuplicates: boolean;
 }
 
 interface ModelConfig {
@@ -36,6 +37,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     handleNulls: false,
     normalizeData: false,
     encodeCategories: false,
+    removeDuplicates: false,
   });
   const [modelConfig, setModelConfig] = useState<ModelConfig>({
     modelType: '',
@@ -49,6 +51,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       handleNulls: false,
       normalizeData: false,
       encodeCategories: false,
+      removeDuplicates: false,
     });
     setModelConfig({
       modelType: '',

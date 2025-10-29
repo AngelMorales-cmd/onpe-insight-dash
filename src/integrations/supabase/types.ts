@@ -94,21 +94,33 @@ export type Database = {
       }
       votes: {
         Row: {
+          address: string | null
           candidate_id: string
           created_at: string
+          email: string | null
+          full_name: string | null
           id: string
+          phone: string | null
           user_id: string | null
         }
         Insert: {
+          address?: string | null
           candidate_id: string
           created_at?: string
+          email?: string | null
+          full_name?: string | null
           id?: string
+          phone?: string | null
           user_id?: string | null
         }
         Update: {
+          address?: string | null
           candidate_id?: string
           created_at?: string
+          email?: string | null
+          full_name?: string | null
           id?: string
+          phone?: string | null
           user_id?: string | null
         }
         Relationships: [

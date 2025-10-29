@@ -115,6 +115,24 @@ const DataCleaning = () => {
                     </p>
                   </div>
                 </div>
+
+                <div className="flex items-start space-x-3 rounded-lg border border-border bg-accent/50 p-4">
+                  <Checkbox
+                    id="removeDuplicates"
+                    checked={cleaningOptions.removeDuplicates}
+                    onCheckedChange={(checked) =>
+                      setCleaningOptions({ ...cleaningOptions, removeDuplicates: checked as boolean })
+                    }
+                  />
+                  <div className="space-y-1">
+                    <Label htmlFor="removeDuplicates" className="cursor-pointer font-medium">
+                      Eliminar duplicados
+                    </Label>
+                    <p className="text-sm text-muted-foreground">
+                      Eliminación de filas duplicadas usando Pandas (drop_duplicates)
+                    </p>
+                  </div>
+                </div>
               </div>
 
               <div className="rounded-lg border border-primary/20 bg-primary/5 p-4">
