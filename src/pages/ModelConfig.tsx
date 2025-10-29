@@ -9,7 +9,7 @@ import { Loader2, PlayCircle, Database } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 
 const ModelConfig = () => {
-  const { csvData, cleaningOptions, modelConfig, setModelConfig } = useDataContext();
+  const { csvData, modelConfig, setModelConfig } = useDataContext();
   const { toast } = useToast();
   const navigate = useNavigate();
   const [progress, setProgress] = useState(0);
@@ -93,43 +93,6 @@ const ModelConfig = () => {
         </Card>
       ) : (
         <div className="grid gap-6">
-          <Card className="shadow-medium">
-            <CardHeader>
-              <CardTitle>Opciones de Limpieza Seleccionadas</CardTitle>
-              <CardDescription>
-                Revise las operaciones de preprocesamiento configuradas
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="flex items-center justify-between rounded-lg border border-border bg-accent/30 p-3">
-                <span className="text-sm font-medium">Manejar valores nulos</span>
-                <span className={`text-sm ${cleaningOptions.handleNulls ? 'text-primary font-medium' : 'text-muted-foreground'}`}>
-                  {cleaningOptions.handleNulls ? 'Activado' : 'Desactivado'}
-                </span>
-              </div>
-              <div className="flex items-center justify-between rounded-lg border border-border bg-accent/30 p-3">
-                <span className="text-sm font-medium">Normalizar datos</span>
-                <span className={`text-sm ${cleaningOptions.normalizeData ? 'text-primary font-medium' : 'text-muted-foreground'}`}>
-                  {cleaningOptions.normalizeData ? 'Activado' : 'Desactivado'}
-                </span>
-              </div>
-              <div className="flex items-center justify-between rounded-lg border border-border bg-accent/30 p-3">
-                <span className="text-sm font-medium">Codificar variables categóricas</span>
-                <span className={`text-sm ${cleaningOptions.encodeCategories ? 'text-primary font-medium' : 'text-muted-foreground'}`}>
-                  {cleaningOptions.encodeCategories ? 'Activado' : 'Desactivado'}
-                </span>
-              </div>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={() => navigate('/cleaning')}
-                className="w-full mt-2"
-              >
-                Modificar configuración de limpieza
-              </Button>
-            </CardContent>
-          </Card>
-
           <Card className="shadow-medium">
             <CardHeader>
               <CardTitle>Selección de Modelo de Machine Learning</CardTitle>
