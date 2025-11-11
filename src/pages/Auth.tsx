@@ -10,24 +10,34 @@ import { Vote } from 'lucide-react';
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [dni, setDni] = useState('');
   const [fullName, setFullName] = useState('');
-  const { signIn, signUp } = useAuth();
+  const { signIn, signInWithDNI, registerWithDNI } = useAuth();
   const navigate = useNavigate();
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleAdminSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const { error } = await signIn(email, password);
+    if (!error) {
+      navigate('/');
+    }
+  };
+
+  const handleUserSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (isLogin) {
-      const { error } = await signIn(email, password);
+      const { error } = await signInWithDNI(dni);
       if (!error) {
-        navigate('/');
+        navigate('/voting');
       }
     } else {
-      const { error } = await signUp(email, password, fullName);
+      const { error } = await registerWithDNI(dni, fullName);
       if (!error) {
-        navigate('/');
+        navigate('/voting');
       }
     }
   };
@@ -45,84 +55,110 @@ const Auth = () => {
           <CardDescription>Acceso al sistema de elecciones</CardDescription>
         </CardHeader>
         <CardContent>
-          <Tabs value={isLogin ? 'login' : 'register'} onValueChange={(v) => setIsLogin(v === 'login')}>
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="login">Iniciar Sesión</TabsTrigger>
-              <TabsTrigger value="register">Registrarse</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="login">
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="login-email">Correo Electrónico</Label>
-                  <Input
-                    id="login-email"
-                    type="email"
-                    placeholder="correo@ejemplo.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="login-password">Contraseña</Label>
-                  <Input
-                    id="login-password"
-                    type="password"
-                    placeholder="••••••••"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                  />
-                </div>
-                <Button type="submit" className="w-full">
-                  Iniciar Sesión
-                </Button>
-              </form>
-            </TabsContent>
-            
-            <TabsContent value="register">
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="register-name">Nombre Completo</Label>
-                  <Input
-                    id="register-name"
-                    type="text"
-                    placeholder="Juan Pérez"
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="register-email">Correo Electrónico</Label>
-                  <Input
-                    id="register-email"
-                    type="email"
-                    placeholder="correo@ejemplo.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="register-password">Contraseña</Label>
-                  <Input
-                    id="register-password"
-                    type="password"
-                    placeholder="••••••••"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    minLength={6}
-                  />
-                </div>
-                <Button type="submit" className="w-full">
-                  Registrarse
-                </Button>
-              </form>
-            </TabsContent>
-          </Tabs>
+          <div className="mb-4">
+            <Tabs value={isAdmin ? 'admin' : 'user'} onValueChange={(v) => setIsAdmin(v === 'admin')}>
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="user">Votante</TabsTrigger>
+                <TabsTrigger value="admin">Administrador</TabsTrigger>
+              </TabsList>
+            </Tabs>
+          </div>
+
+          {isAdmin ? (
+            <form onSubmit={handleAdminSubmit} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="admin-email">Correo Electrónico</Label>
+                <Input
+                  id="admin-email"
+                  type="email"
+                  placeholder="admin@onpe.gob.pe"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="admin-password">Contraseña</Label>
+                <Input
+                  id="admin-password"
+                  type="password"
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+              </div>
+              <Button type="submit" className="w-full">
+                Iniciar Sesión como Administrador
+              </Button>
+            </form>
+          ) : (
+            <Tabs value={isLogin ? 'login' : 'register'} onValueChange={(v) => setIsLogin(v === 'login')}>
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="login">Iniciar Sesión</TabsTrigger>
+                <TabsTrigger value="register">Registrarse</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="login">
+                <form onSubmit={handleUserSubmit} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="login-dni">DNI</Label>
+                    <Input
+                      id="login-dni"
+                      type="text"
+                      placeholder="12345678"
+                      value={dni}
+                      onChange={(e) => setDni(e.target.value)}
+                      required
+                      maxLength={8}
+                      pattern="[0-9]{8}"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Ingrese su DNI de 8 dígitos
+                    </p>
+                  </div>
+                  <Button type="submit" className="w-full">
+                    Iniciar Sesión
+                  </Button>
+                </form>
+              </TabsContent>
+              
+              <TabsContent value="register">
+                <form onSubmit={handleUserSubmit} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="register-dni">DNI</Label>
+                    <Input
+                      id="register-dni"
+                      type="text"
+                      placeholder="12345678"
+                      value={dni}
+                      onChange={(e) => setDni(e.target.value)}
+                      required
+                      maxLength={8}
+                      pattern="[0-9]{8}"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Ingrese su DNI de 8 dígitos
+                    </p>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="register-name">Nombre Completo</Label>
+                    <Input
+                      id="register-name"
+                      type="text"
+                      placeholder="Juan Pérez García"
+                      value={fullName}
+                      onChange={(e) => setFullName(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <Button type="submit" className="w-full">
+                    Registrarse
+                  </Button>
+                </form>
+              </TabsContent>
+            </Tabs>
+          )}
         </CardContent>
       </Card>
     </div>

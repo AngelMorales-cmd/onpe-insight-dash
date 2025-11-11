@@ -20,34 +20,35 @@ const Dashboard = () => {
     }
   }, [csvData, modelConfig, navigate]);
 
-  // Mock data for demonstration
+  // Datos electorales simulados
   const barData = [
-    { name: 'Región Norte', votos: 45000 },
-    { name: 'Región Centro', votos: 52000 },
-    { name: 'Región Sur', votos: 38000 },
-    { name: 'Región Este', votos: 41000 },
-    { name: 'Región Oeste', votos: 47000 },
+    { name: 'Lima', votos: 3200000 },
+    { name: 'Arequipa', votos: 850000 },
+    { name: 'La Libertad', votos: 1200000 },
+    { name: 'Piura', votos: 980000 },
+    { name: 'Cusco', votos: 740000 },
+    { name: 'Lambayeque', votos: 680000 },
   ];
 
   const lineData = [
-    { name: '2016', participacion: 75 },
-    { name: '2018', participacion: 78 },
-    { name: '2020', participacion: 82 },
-    { name: '2022', participacion: 79 },
-    { name: '2024', participacion: 85 },
+    { name: '08:00', participacion: 12 },
+    { name: '10:00', participacion: 28 },
+    { name: '12:00', participacion: 45 },
+    { name: '14:00', participacion: 63 },
+    { name: '16:00', participacion: 78 },
+    { name: '18:00', participacion: 85 },
   ];
 
   const pieData = [
-    { name: 'Partido A', value: 35 },
-    { name: 'Partido B', value: 28 },
-    { name: 'Partido C', value: 22 },
-    { name: 'Partido D', value: 15 },
+    { name: 'Presidencial', value: 42 },
+    { name: 'Distrital', value: 35 },
+    { name: 'Regional', value: 23 },
   ];
 
   const radialData = [
-    { name: 'Precisión', accuracy: 92, fill: 'hsl(215 100% 32%)' },
-    { name: 'Recall', accuracy: 88, fill: 'hsl(348 100% 45%)' },
-    { name: 'F1-Score', accuracy: 90, fill: 'hsl(215 85% 55%)' },
+    { name: 'Actas Escrutadas', accuracy: 96, fill: 'hsl(215 100% 32%)' },
+    { name: 'Votos Válidos', accuracy: 94, fill: 'hsl(348 100% 45%)' },
+    { name: 'Participación', accuracy: 85, fill: 'hsl(215 85% 55%)' },
   ];
 
   return (
@@ -127,10 +128,10 @@ const Dashboard = () => {
 
       {/* Charts Grid */}
       <div className="grid gap-6 lg:grid-cols-2">
-        <BarChartComponent data={barData} title="Distribución de Votos por Región" />
-        <LineChartComponent data={lineData} title="Evolución de Participación Electoral" />
-        <PieChartComponent data={pieData} title="Porcentaje de Votos por Partido" />
-        <RadialChartComponent data={radialData} title="Métricas de Precisión del Modelo" />
+        <BarChartComponent data={barData} title="Votos por Departamento" />
+        <LineChartComponent data={lineData} title="Participación Electoral en Tiempo Real" />
+        <PieChartComponent data={pieData} title="Distribución por Categoría Electoral" />
+        <RadialChartComponent data={radialData} title="Avance del Proceso Electoral" />
       </div>
 
       {/* Summary Card */}

@@ -9,6 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 interface Candidate {
   id: string;
@@ -19,12 +20,20 @@ interface Candidate {
   proposals: string[];
 }
 
+type ElectionCategory = 'presidencial' | 'distrital' | 'regional';
+
 const Voting = () => {
   const [candidates, setCandidates] = useState<Candidate[]>([]);
-  const [votedFor, setVotedFor] = useState<string | null>(null);
+  const [votedFor, setVotedFor] = useState<Record<ElectionCategory, string | null>>({
+    presidencial: null,
+    distrital: null,
+    regional: null
+  });
   const [loading, setLoading] = useState(true);
   const [showVoteDialog, setShowVoteDialog] = useState(false);
   const [selectedCandidateId, setSelectedCandidateId] = useState<string | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<ElectionCategory>('presidencial');
+  const [activeCategory, setActiveCategory] = useState<ElectionCategory>('presidencial');
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -78,16 +87,25 @@ const Voting = () => {
     
     const { data } = await supabase
       .from('votes')
-      .select('candidate_id')
-      .eq('user_id', user.id)
-      .maybeSingle();
+      .select('candidate_id, category')
+      .eq('user_id', user.id);
 
     if (data) {
-      setVotedFor(data.candidate_id);
+      const votes: Record<ElectionCategory, string | null> = {
+        presidencial: null,
+        distrital: null,
+        regional: null
+      };
+      
+      data.forEach((vote: any) => {
+        votes[vote.category as ElectionCategory] = vote.candidate_id;
+      });
+      
+      setVotedFor(votes);
     }
   };
 
-  const handleVote = (candidateId: string) => {
+  const handleVote = (candidateId: string, category: ElectionCategory) => {
     if (!user) {
       toast({
         title: "Inicia sesión",
@@ -97,16 +115,17 @@ const Voting = () => {
       return;
     }
 
-    if (votedFor) {
+    if (votedFor[category]) {
       toast({
-        title: "Ya votaste",
-        description: "Solo puedes votar una vez",
+        title: "Ya votaste en esta categoría",
+        description: `Solo puedes votar una vez en ${category}`,
         variant: "destructive",
       });
       return;
     }
 
     setSelectedCandidateId(candidateId);
+    setSelectedCategory(category);
     setShowVoteDialog(true);
   };
 
@@ -127,6 +146,7 @@ const Voting = () => {
       .insert({
         user_id: user.id,
         candidate_id: selectedCandidateId,
+        category: selectedCategory,
         full_name: formData.fullName,
         email: formData.email,
         phone: formData.phone,
@@ -140,12 +160,12 @@ const Voting = () => {
         variant: "destructive",
       });
     } else {
-      setVotedFor(selectedCandidateId);
+      setVotedFor({ ...votedFor, [selectedCategory]: selectedCandidateId });
       setShowVoteDialog(false);
       setFormData({ fullName: '', email: '', phone: '', address: '' });
       toast({
         title: "¡Voto registrado!",
-        description: "Tu voto ha sido registrado exitosamente",
+        description: `Tu voto en ${selectedCategory} ha sido registrado exitosamente`,
       });
     }
   };
@@ -158,19 +178,38 @@ const Voting = () => {
     );
   }
 
+  const filteredCandidates = candidates.filter(c => (c as any).category === activeCategory);
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="text-center mb-8">
-        <h1 className="text-4xl font-bold text-foreground mb-2">Elecciones Presidenciales 2025</h1>
-        <p className="text-lg text-muted-foreground">Selecciona tu candidato preferido</p>
+        <h1 className="text-4xl font-bold text-foreground mb-2">Elecciones 2025</h1>
+        <p className="text-lg text-muted-foreground">Selecciona tu candidato preferido en cada categoría</p>
       </div>
 
+      <Tabs value={activeCategory} onValueChange={(v) => setActiveCategory(v as ElectionCategory)} className="mb-6">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="presidencial">
+            Presidencial
+            {votedFor.presidencial && <CheckCircle2 className="ml-2 h-4 w-4" />}
+          </TabsTrigger>
+          <TabsTrigger value="distrital">
+            Distrital
+            {votedFor.distrital && <CheckCircle2 className="ml-2 h-4 w-4" />}
+          </TabsTrigger>
+          <TabsTrigger value="regional">
+            Regional
+            {votedFor.regional && <CheckCircle2 className="ml-2 h-4 w-4" />}
+          </TabsTrigger>
+        </TabsList>
+      </Tabs>
+
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {candidates.map((candidate) => (
+        {filteredCandidates.map((candidate) => (
           <Card
             key={candidate.id}
             className={`shadow-medium transition-all hover:shadow-strong ${
-              votedFor === candidate.id ? 'ring-2 ring-primary' : ''
+              votedFor[activeCategory] === candidate.id ? 'ring-2 ring-primary' : ''
             }`}
           >
             <CardHeader>
@@ -182,7 +221,7 @@ const Voting = () => {
                   </Badge>
                   <CardDescription className="text-sm">{candidate.description}</CardDescription>
                 </div>
-                {votedFor === candidate.id && (
+                {votedFor[activeCategory] === candidate.id && (
                   <CheckCircle2 className="h-8 w-8 text-primary flex-shrink-0 ml-2" />
                 )}
               </div>
@@ -207,12 +246,12 @@ const Voting = () => {
               </div>
 
               <Button
-                onClick={() => handleVote(candidate.id)}
-                disabled={votedFor !== null}
+                onClick={() => handleVote(candidate.id, activeCategory)}
+                disabled={votedFor[activeCategory] !== null}
                 className="w-full mt-4"
-                variant={votedFor === candidate.id ? 'default' : 'outline'}
+                variant={votedFor[activeCategory] === candidate.id ? 'default' : 'outline'}
               >
-                {votedFor === candidate.id ? (
+                {votedFor[activeCategory] === candidate.id ? (
                   <>
                     <CheckCircle2 className="mr-2 h-4 w-4" />
                     Voto Registrado

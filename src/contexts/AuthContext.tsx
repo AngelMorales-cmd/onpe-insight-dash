@@ -9,6 +9,8 @@ interface AuthContextType {
   isAdmin: boolean;
   signUp: (email: string, password: string, fullName: string) => Promise<{ error: any }>;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
+  signInWithDNI: (dni: string) => Promise<{ error: any; profile?: any }>;
+  registerWithDNI: (dni: string, fullName: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
   loading: boolean;
 }
@@ -118,6 +120,88 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     return { error };
   };
 
+  const signInWithDNI = async (dni: string) => {
+    try {
+      // Buscar el perfil por DNI
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('dni', dni)
+        .maybeSingle();
+
+      if (profileError) {
+        return { error: profileError };
+      }
+
+      if (!profile) {
+        return { 
+          error: { message: 'DNI no registrado. Por favor, regístrese primero.' },
+          profile: null
+        };
+      }
+
+      // Iniciar sesión anónima para el usuario
+      const { error: signInError } = await supabase.auth.signInAnonymously();
+      
+      if (signInError) {
+        return { error: signInError };
+      }
+
+      toast({
+        title: "¡Inicio de sesión exitoso!",
+        description: `Bienvenido, ${profile.full_name}`,
+      });
+
+      return { error: null, profile };
+    } catch (error: any) {
+      return { error };
+    }
+  };
+
+  const registerWithDNI = async (dni: string, fullName: string) => {
+    try {
+      // Verificar si el DNI ya existe
+      const { data: existingProfile } = await supabase
+        .from('profiles')
+        .select('dni')
+        .eq('dni', dni)
+        .maybeSingle();
+
+      if (existingProfile) {
+        return { error: { message: 'Este DNI ya está registrado. Por favor, inicie sesión.' } };
+      }
+
+      // Crear una cuenta anónima
+      const { data: authData, error: signUpError } = await supabase.auth.signInAnonymously();
+      
+      if (signUpError || !authData.user) {
+        return { error: signUpError };
+      }
+
+      // Actualizar el perfil con DNI y nombre
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({ 
+          dni: dni,
+          full_name: fullName
+        })
+        .eq('id', authData.user.id);
+
+      if (updateError) {
+        return { error: updateError };
+      }
+
+      toast({
+        title: "¡Registro exitoso!",
+        description: "Bienvenido al sistema electoral ONPE",
+      });
+
+      return { error: null };
+    } catch (error: any) {
+      return { error };
+    }
+  };
+
   const signOut = async () => {
     await supabase.auth.signOut();
     toast({
@@ -134,6 +218,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         isAdmin,
         signUp,
         signIn,
+        signInWithDNI,
+        registerWithDNI,
         signOut,
         loading,
       }}
